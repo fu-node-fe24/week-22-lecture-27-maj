@@ -1,0 +1,391 @@
+info:
+  description: API Documentation for Blog Post API
+  title: Blog Post API
+  version: 1.0.0
+openapi: 3.0.1
+components:
+  ## Här börjar mina scheman
+  schemas:
+    Key:
+      type: string
+      description: API Key
+      example: blog-kmcvn
+    Post:
+      description: Post
+      type: object
+      properties:
+        postId:
+          type: string
+          example: post-gdbcc
+        userId:
+          type: string
+          example: 7bdgc
+        title:
+          type: string
+          example: bla bla
+        text:
+          type: string
+          example: bla bla bla bla
+    User:
+      description: User Body
+      type: object
+      properties:
+        userId:
+          type: string
+          example: user-hsbvc
+        username:
+          type: string
+          example: jespernyberg
+        password:
+          type: string
+          example: secretpassword
+    UserBody:
+      description: User Body
+      type: object
+      properties:
+        username:
+          type: string
+          example: jespernyberg
+        password:
+          type: string
+          example: secretpassword
+    PostBody:
+      description: Post Body
+      type: object
+      properties:
+        title:
+          type: string
+          example: bla bla
+        text:
+          type: string
+          example: bla bla bla bla
+  ## Här börjar mina responses
+  responses:
+    BadRequestError:
+      description: Bad request from client
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Missing or invalid parameters in request
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Requested resource not found
+paths:
+  /api/keys:
+    get:
+      tags:
+        - API Keys
+      description: Returns random API Key
+      responses:
+        "200":
+          description: Returns random API Key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  key:
+                    type: string
+                    example: blog-jnchd
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /api/auth/logout:
+    get:
+      tags:
+        - Auth
+      description: Logout for user
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+      responses:
+        "200":
+          description: Response for successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged out successfully
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      description: Register new user
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/UserBody"
+      responses:
+        "200":
+          description: Response for successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User registrated successfully
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      description: Login user
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/UserBody"
+      responses:
+        "200":
+          description: Response for successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged in successfully
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/posts:
+    get:
+      tags:
+        - Posts
+      description: Fetches all posts
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+      responses:
+        "200":
+          description: Returns all posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  posts:
+                    type: array
+                    items:
+                      anyOf:
+                        - $ref: "#/components/schemas/Post"
+                        - $ref: "#/components/schemas/Post"
+                        - $ref: "#/components/schemas/Post"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    post:
+      tags:
+        - Posts
+      description: Add new blog post
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/PostBody"
+      responses:
+        "200":
+          description: Confirmation for successfull post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: New blog post added successfully
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/posts/{userId}:
+    get:
+      tags:
+        - Posts
+      description: Fetches all posts from user
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: user-bbhvc
+      responses:
+        "200":
+          description: Returns all posts from specific user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  posts:
+                    type: array
+                    items:
+                      anyOf:
+                        - $ref: "#/components/schemas/Post"
+                        - $ref: "#/components/schemas/Post"
+                        - $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /api/posts/{postId}:
+    put:
+      tags:
+        - Posts
+      description: Updates specific post
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+            example: post-jsndb
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/PostBody"
+      responses:
+        "200":
+          description: Confirmation of successful put request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Post updated successfully
+                  post:
+                    type: object
+                    $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    delete:
+      tags:
+        - Posts
+      description: Deletes specific post
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            $ref: "#/components/schemas/Key"
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+            example: post-jsndb
+      responses:
+        "200":
+          description: Confirmation of successful deletion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Post deleted successfully
+                  post:
+                    type: object
+                    $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
